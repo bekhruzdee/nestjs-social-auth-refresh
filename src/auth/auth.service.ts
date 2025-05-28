@@ -87,4 +87,24 @@ export class AuthService {
       throw new UnauthorizedException('Credentials are not valid.');
     }
   }
+
+  async verifyUserRefreshToken(refreshToken: string, userId: string) {
+    try {
+      const user = await this.usersService.getUser({ _id: userId });
+
+      if (!user.refreshToken) {
+        throw new UnauthorizedException('Refresh token not found.');
+      }
+
+      const authenticated = await compare(refreshToken, user.refreshToken);
+
+      if (!authenticated) {
+        throw new UnauthorizedException('Refresh token is invalid.');
+      }
+
+      return user;
+    } catch (err) {
+      throw new UnauthorizedException('Refresh token is not valid.');
+    }
+  }
 }

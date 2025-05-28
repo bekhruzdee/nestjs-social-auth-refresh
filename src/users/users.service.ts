@@ -27,7 +27,7 @@ export class UsersService {
   }
 
   async getUsers() {
-    return this.userModel.find({})
+    return this.userModel.find({});
   }
 
   async updateUser(query: FilterQuery<User>, data: UpdateQuery<User>) {

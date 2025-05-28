@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { compare } from 'bcryptjs';
+import { compare, hash } from 'bcryptjs';
 import { User } from 'src/users/schema/user.schema';
 import { UsersService } from '../users/users.service';
 import { TokenPayload } from './token-payload.interface';
@@ -54,10 +54,20 @@ export class AuthService {
       )}ms`,
     });
 
+    await this.usersService.updateUser(
+      { _id: user._id },
+      { $set: { refreshToken: await hash(refreshToken, 10) } },
+    );
+
     response.cookie('Authentication', accessToken, {
       httpOnly: true,
       secure: this.configService.get('NODE_ENV') === 'production',
       expires: expiresAccessToken,
+    });
+    response.cookie('Refresh', refreshToken, {
+      httpOnly: true,
+      secure: this.configService.get('NODE_ENV') === 'production',
+      expires: expiresRefreshToken,
     });
 
     return { message: 'Login successful' };
